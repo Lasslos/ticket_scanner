@@ -1,36 +1,77 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ticket_scanner/provider/qr_code_information_provider.dart';
 import 'package:ticket_scanner/screens/qr_code_scanner.dart';
 import 'package:ticket_scanner/screens/settings_screen.dart';
 import 'package:ticket_scanner/screens/validation_display.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(
-      title: const Text('Ticket Scanner'),
-      //implement hamburger menu
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
 
-    ),
-    drawer: const MyDrawer(),
-    body: ListView(
-      children: [
-        const SizedBox(
-          height: 12,
-        ),
-        Container(
-          height: 0.5 * MediaQuery.of(context).size.height,
-          margin: const EdgeInsets.all(8),
-          child: ClipRRect(
-            borderRadius: BorderRadius.circular(42),
-            child: /*const QRCodeScanner()*/const ColoredBox(color: Colors.black),
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool showBorder = false;
+
+  Future<void> _animate() async {
+    setState(() {
+      showBorder = true;
+    });
+    await Future<void>.delayed(const Duration(milliseconds: 600));
+    setState(() {
+      showBorder = false;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen(qrCodeInformationProvider.select((value) => value?.code), (previous, next) {
+      if (next != null && next != previous) {
+        _animate();
+      }
+    });
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Ticket-Scanner'),
+      ),
+      drawer: const MyDrawer(),
+      body: Column(
+        children: [
+          const SizedBox(
+            height: 12,
           ),
-        ),
-        const ValidationDisplay(),
-      ],
-    ),
-  );
+          Flexible(
+            flex: 2,
+            fit: FlexFit.tight,
+            child: SizedBox.expand(
+              child: AnimatedContainer(
+                margin: const EdgeInsets.all(16),
+                duration: const Duration(milliseconds: 300),
+                decoration: BoxDecoration(
+                  boxShadow: [
+                    if (showBorder) const BoxShadow(color: Colors.green, spreadRadius: 4)
+                  ],
+                  borderRadius: BorderRadius.circular(42),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: const QRCodeScanner(),
+              ),
+            ),
+          ),
+          const Flexible(
+            flex: 1,
+            fit: FlexFit.tight,
+            child: ValidationDisplay(),
+          ),
+        ],
+      ),
+    );
+  }
+
+
 }
 
 class MyDrawer extends StatelessWidget {

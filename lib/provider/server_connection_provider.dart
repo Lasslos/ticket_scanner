@@ -12,9 +12,11 @@ class ServerConnectionNotifier extends StateNotifier<ServerInformation> {
 
   set uri(Uri uri) {
     state = ServerInformation(uri, state.password);
+    save();
   }
   set password(String password) {
     state = ServerInformation(state.uri, password);
+    save();
   }
 
   void initialize() async {

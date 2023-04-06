@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ticket_scanner/provider/server_connection_provider.dart';
+import 'package:ticket_scanner/provider/ticket_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({
@@ -15,12 +16,19 @@ class SettingsScreen extends ConsumerWidget {
       ),
       body: ListView(
         children: [
-          Padding(
+          /*Padding(
             padding: const EdgeInsets.only(top: 16.0, left: 16.0, right: 16.0),
             child: ListTile(
               title: const Text('Server'),
               subtitle: Text(ref.watch(serverConnectionProvider).uri.toString()),
               onTap: () =>_showServerDialog(context, ref),
+            ),
+          ),*/
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: ListTile(
+              title: const Text('Tickets importieren'),
+              onTap: () => ref.read(ticketsProvider.notifier).loadTicketListFromFile(),
             ),
           ),
         ],

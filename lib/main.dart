@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ticket_scanner/provider/ticket_provider.dart';
 import 'package:ticket_scanner/screens/home_screen.dart';
 
 import 'provider/server_connection_provider.dart';
@@ -21,6 +22,7 @@ class _MyAppState extends ConsumerState<MyApp> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       ref.read(serverConnectionProvider.notifier).initialize();
+      ref.read(ticketsProvider.notifier).initialize();
     });
   }
 
