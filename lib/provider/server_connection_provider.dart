@@ -3,32 +3,26 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ServerInformation {
   Uri uri;
-  String password;
 
-  ServerInformation(this.uri, this.password);
+  ServerInformation(this.uri);
 }
 class ServerConnectionNotifier extends StateNotifier<ServerInformation> {
-  ServerConnectionNotifier() : super(ServerInformation(Uri.parse('http://localhost:8080'), ''));
+  ServerConnectionNotifier() : super(ServerInformation(Uri.parse('http://localhost:8080')));
 
   set uri(Uri uri) {
-    state = ServerInformation(uri, state.password);
-    save();
-  }
-  set password(String password) {
-    state = ServerInformation(state.uri, password);
+    state = ServerInformation(uri);
     save();
   }
 
   void initialize() async {
     final prefs = await SharedPreferences.getInstance();
     final uri = prefs.getString('uri');
-    final password = prefs.getString('password');
-    state = ServerInformation(Uri.parse(uri ?? 'http://localhost:8080'), password ?? '');
+    state = ServerInformation(Uri.parse(uri ?? 'http://localhost:8080'));
+    save();
   }
   void save() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('uri', state.uri.toString());
-    await prefs.setString('password', state.password);
   }
 }
 
