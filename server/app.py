@@ -1,4 +1,4 @@
-from flask import Flask, abort, request
+from flask import Flask, request, send_file
 
 app = Flask(__name__)
 
@@ -12,30 +12,37 @@ class Ticket:
 
 
 def toJSON(ticketid, tickettype, isvalid, isdevaluated):
-    return "{\n\"TicketID\": \"" + ticketid + "\",\n\"TicketType\" : \"" + tickettype + "\",\n\"IsValid\" : " + str(
-        isvalid).lower() + ",\n\"IsDevaluated\" : " + str(isdevaluated).lower() + "\n}"
+    return "{\"ticketID\": \"" + ticketid + "\",\"ticketType\" : \"" + tickettype + "\",\n\"isValid\" : " + str(isvalid).lower() + ",\n\"isDevaluated\" : " + str(isdevaluated).lower() + "\n}"
 
 
 d1 = Ticket('1', "regular", True, False)
 d2 = Ticket('2', "reduced", True, False)
-mylist = [d1, d2]
+d3 = Ticket('3', "volunteer", True, False)
+d4 = Ticket('4', "regular", True, False)
+mylist = [d1, d2, d3, d4]
+
+thisdict = {
+  "1": d1,
+  "2": d2,
+  "3": d3,
+  "4": d4
+}
 
 
 @app.route("/")
 def index():
-    if request.args.get("auth") != "authkey":
-        return abort(401)
-    for x in mylist:
-        if x.ticket_id == request.args.get("d"):
-            if x.is_devaluated == False:
-                x.is_devaluated = True
-                return toJSON(x.ticket_id, x.ticket_type, x.is_valid, False)
-            return toJSON(x.ticket_id, x.ticket_type, x.is_valid, x.is_devaluated)
-    return toJSON(request.args.get("d"), "unknown", False, False)
+    ticket_id_to_validate = request.args.get("d")
+    if thisdict.__contains__(ticket_id_to_validate) == False:
+        return toJSON(request.args.get("d"), "unknown", False, False)
+    if thisdict[ticket_id_to_validate].is_devaluated == False:
+        thisdict[ticket_id_to_validate].is_devaluated = True
+        return toJSON(thisdict[ticket_id_to_validate].ticket_id, thisdict[ticket_id_to_validate].ticket_type, thisdict[ticket_id_to_validate].is_valid, False)
+    return toJSON(thisdict[ticket_id_to_validate].ticket_id, thisdict[ticket_id_to_validate].ticket_type, thisdict[ticket_id_to_validate].is_valid, thisdict[ticket_id_to_validate].is_devaluated)
 
-@app.route("/a")
+
+@app.route("/app")
 def a():
-    return request.args.get("d")
+    return send_file("C:/Flutter/Projects/ticket_scanner/build/app/outputs/flutter-apk/app-release.apk")
 
 
 if __name__ == "__main__":
