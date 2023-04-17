@@ -41,6 +41,6 @@ class Ticket {
 }
 
 final ticketValidationProvider = FutureProvider.autoDispose.family<Ticket, String>((ref, ticketId) async {
-  var result = await http.get(ref.watch(serverConnectionProvider).uri.resolve("?d=$ticketId"));
+  var result = await http.get(ref.watch(serverConnectionProvider).uri.resolve("?$ticketId"));
   return Ticket.fromJson(jsonDecode(result.body));
 });

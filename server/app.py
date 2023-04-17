@@ -1,4 +1,5 @@
 import json
+
 from flask import Flask, request, send_file
 
 app = Flask(__name__)
@@ -19,7 +20,7 @@ def toJSON(ticketid, tickettype, isvalid, isdevaluated):
 
 @app.route("/")
 def index():
-    ticket_id_to_validate = request.args.get("d")
+    ticket_id_to_validate = request.args.get("id")
     read_from_json()
     if thisdict.__contains__(ticket_id_to_validate) == False:
         return toJSON(request.args.get("d"), "unknown", False, False)
