@@ -23,7 +23,7 @@ def index():
     ticket_id_to_validate = request.args.get("id")
     read_from_json()
     if thisdict.__contains__(ticket_id_to_validate) == False:
-        return toJSON(request.args.get("d"), "unknown", False, False)
+        return toJSON(request.args.get("id"), "unknown", False, False)
     if thisdict[ticket_id_to_validate]["is_devaluated"] == False:
         thisdict[ticket_id_to_validate]["is_devaluated"] = True
         write_to_json()
