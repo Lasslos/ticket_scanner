@@ -52,7 +52,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 duration: const Duration(milliseconds: 300),
                 decoration: BoxDecoration(
                   boxShadow: [
-                    if (showBorder) const BoxShadow(color: Colors.green, spreadRadius: 4)
+                    if (showBorder) const BoxShadow(color: Colors.deepPurple, spreadRadius: 4)
                   ],
                   borderRadius: BorderRadius.circular(42),
                 ),
