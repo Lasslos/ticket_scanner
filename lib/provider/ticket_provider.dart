@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:http/http.dart' as http;
 import 'package:ticket_scanner/provider/server_connection_provider.dart';
+import 'package:vibration/vibration.dart';
 
 enum TicketType {
   regular("Regulär", Colors.green), reduced("Ermäßigt", Colors.yellow), volunteer("Helfer", Colors.blue), unknown("Ungültig", Colors.red);
@@ -41,6 +42,7 @@ class Ticket {
 }
 
 final ticketValidationProvider = FutureProvider.autoDispose.family<Ticket, String>((ref, ticketId) async {
+  Vibration.vibrate(amplitude: 50, duration: 50);
   var result = await http.get(ref.watch(serverConnectionProvider).uri.resolve("?$ticketId"));
   return Ticket.fromJson(jsonDecode(result.body));
 });

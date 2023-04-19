@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:ticket_scanner/provider/qr_code_information_provider.dart';
@@ -38,7 +37,6 @@ class _QRCodeScannerState extends ConsumerState<QRCodeScanner> {
   void _onQRViewCreated(QRViewController controller) {
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
-      HapticFeedback.mediumImpact();
       ref.read(qrCodeInformationProvider.notifier).state = scanData;
     });
   }

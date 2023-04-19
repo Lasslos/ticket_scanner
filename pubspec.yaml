@@ -16,6 +16,7 @@ dependencies:
   shared_preferences: ^2.1.0
   file_picker: ^5.2.7
   http: ^0.13.5
+  vibration: ^1.7.5
 
 dev_dependencies:
   flutter_test:
