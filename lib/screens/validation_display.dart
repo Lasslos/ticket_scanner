@@ -62,7 +62,7 @@ class ValidationDisplay extends ConsumerWidget {
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: color,
               ),
-            )
+            ),
           ],
         );
       },

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ticket_scanner/provider/server_connection_provider.dart';
+import 'package:ticket_scanner/provider/server_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({
