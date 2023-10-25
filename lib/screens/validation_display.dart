@@ -5,8 +5,8 @@ import 'package:ticket_scanner/provider/ticket_provider.dart';
 
 class ValidationDisplay extends ConsumerWidget {
   const ValidationDisplay({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

@@ -4,8 +4,8 @@ import 'package:ticket_scanner/provider/server_provider.dart';
 
 class SettingsScreen extends ConsumerWidget {
   const SettingsScreen({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,8 +39,8 @@ class SettingsScreen extends ConsumerWidget {
 
 class ServerDialog extends ConsumerStatefulWidget {
   const ServerDialog({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   ConsumerState createState() => _ServerDialogState();

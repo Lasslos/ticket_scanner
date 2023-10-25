@@ -6,7 +6,7 @@ import 'package:qr_code_scanner/qr_code_scanner.dart';
 import 'package:ticket_scanner/provider/qr_code_information_provider.dart';
 
 class QRCodeScanner extends ConsumerStatefulWidget {
-  const QRCodeScanner({Key? key}) : super(key: key);
+  const QRCodeScanner({super.key});
 
   @override
   ConsumerState<QRCodeScanner> createState() => _QRCodeScannerState();

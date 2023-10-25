@@ -6,7 +6,7 @@ import 'package:ticket_scanner/screens/settings_screen.dart';
 import 'package:ticket_scanner/screens/validation_display.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
-  const HomeScreen({Key? key}) : super(key: key);
+  const HomeScreen({super.key});
 
   @override
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
@@ -75,7 +75,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 }
 
 class MyDrawer extends StatelessWidget {
-  const MyDrawer({Key? key}) : super(key: key);
+  const MyDrawer({super.key});
 
   @override
   Widget build(BuildContext context) => Drawer(
