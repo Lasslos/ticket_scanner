@@ -4,7 +4,6 @@ from flask import Flask, request, send_file
 
 app = Flask(__name__)
 
-
 class Ticket:
     def __init__(self, ticket_id, ticket_type, is_valid, is_devaluated):
         self.ticket_id = ticket_id

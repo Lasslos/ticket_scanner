@@ -22,16 +22,19 @@ class ValidationDisplay extends ConsumerWidget {
     return ticket.when(
       data: (ticket) {
         IconData icon = ticket.isValid && !ticket.isDevaluated ? Icons.check_circle : Icons.error;
-        Color color = ticket.isValid && !ticket.isDevaluated
-            ? ticket.ticketType.color
-            : Colors.red;
+        Color color;
+        if (ticket.isDevaluated || !ticket.isValid) {
+          color = Colors.red;
+        } else {
+          color = ticket.map(regular: (_) => Colors.green, reduced: (_) => Colors.yellow, volunteer: (_) => Colors.blue, unknown: (_) => Colors.red);
+        }
         String text;
         if (!ticket.isValid) {
           text = "Ungültig";
         } else if (ticket.isDevaluated) {
           text = "Bereits entwertet";
         } else {
-          text = ticket.ticketType.displayName;
+          text = ticket.map(regular: (_) => "Regulär", reduced: (_) => "Reduziert", volunteer: (_) => "Helfende Person", unknown: (_) => "Unbekannt");
         }
 
         return Column(
@@ -58,7 +61,7 @@ class ValidationDisplay extends ConsumerWidget {
             ),
 
             if (ticket.isValid && ticket.isDevaluated) Text(
-              ticket.ticketType.displayName,
+              text,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                 color: color,
               ),
