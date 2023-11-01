@@ -1,18 +1,13 @@
-from fastapi import FastAPI
+from typing import Annotated
+
+from fastapi import Depends, FastAPI
+from fastapi.security import OAuth2PasswordBearer
 
 app = FastAPI()
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
 
 @app.get("/")
-async def root():
-    return {"message": "Hello World"}
-
-
-@app.get("/Hadis brain")
-async def brain():
-    return {"message": "Found. IQ: "}
-
-
-@app.get("/hello/{name}")
-async def say_hello(name: str):
-    return {"message": f"Hello {name}"}
+async def create_ticket(token: Annotated[str, Depends(oauth2_scheme)]):
+    return {"token": token}
