@@ -5,6 +5,8 @@ from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
 from database import dbBase
 
 
+# The database models. These are SQLAlchemy models.
+
 class TicketType(str, enum.Enum):
     student = "student"
     volunteer = "volunteer"
