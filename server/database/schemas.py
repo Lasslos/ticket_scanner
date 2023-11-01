@@ -2,7 +2,7 @@ from datetime import datetime
 
 from pydantic import BaseModel
 
-from models import TicketType
+from database.models import TicketType
 
 
 class TicketBase(BaseModel):

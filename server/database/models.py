@@ -2,7 +2,7 @@ import enum
 
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
 
-from database import dbBase
+from database.database import dbBase
 
 
 # The database models. These are SQLAlchemy models.
