@@ -1,8 +1,12 @@
-from fastapi import Depends, FastAPI
-from fastapi.security import OAuth2PasswordBearer
+from datetime import timedelta
+from typing import Annotated
+
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
-import ticket
+import tickets
+from authentication.user import Token, authenticate_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
 from database import database, schemas
 from database.database import engine
 
@@ -10,34 +14,64 @@ database.dbBase.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token/")
 
 
 @app.get("/ticket/", response_model=schemas.Ticket)
-def get_ticket(ticket_id: int, db: Session = Depends(database.get_db)):
-    return ticket.get_ticket(db, ticket_id)
-
-
-@app.get("/ticket/", response_model=schemas.Ticket)
-def get_ticket_by_name(ticket_name: str, db: Session = Depends(database.get_db)):
-    return ticket.get_ticket_by_name(db, ticket_name)
+def get_ticket(token: Annotated[str, Depends(oauth2_scheme)], ticket_id: int, db: Session = Depends(database.get_db)):
+    ticket = tickets.get_ticket(db, ticket_id)
+    if ticket is None:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    return ticket
 
 
 @app.get("/tickets/", response_model=list[schemas.Ticket])
-def get_tickets(skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db)):
-    return ticket.get_tickets(db, skip, limit)
+def get_tickets(token: Annotated[str, Depends(oauth2_scheme)], skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db)):
+    return tickets.get_tickets(db, skip, limit)
 
 
 @app.post("/ticket/new", response_model=schemas.Ticket)
-def create_ticket(ticket_create: schemas.TicketCreate, db: Session = Depends(database.get_db)):
-    return ticket.create_ticket(db, ticket_create)
+def create_ticket(token: Annotated[str, Depends(oauth2_scheme)], ticket_create: schemas.TicketCreate, db: Session = Depends(database.get_db)):
+    ticket_by_name = tickets.get_ticket_by_name(db, ticket_create.name)
+    ticket_by_id = tickets.get_ticket(db, ticket_create.id)
+    if ticket_by_id is not None:
+        raise HTTPException(status_code=409, detail="Ticket id already exists")
+    if ticket_by_name is not None:
+        raise HTTPException(status_code=409, detail="Ticket name already exists")
+    return tickets.create_ticket(db, ticket_create)
 
 
 @app.put("/ticket/update", response_model=schemas.Ticket)
-def update_ticket(ticket_update: schemas.TicketUpdate, db: Session = Depends(database.get_db)):
-    return ticket.update_ticket(db, ticket_update)
+def update_ticket(token: Annotated[str, Depends(oauth2_scheme)], ticket_update: schemas.TicketUpdate, db: Session = Depends(database.get_db)):
+    ticket_by_name = tickets.get_ticket_by_name(db, ticket_update.name)
+    ticket_by_id = tickets.get_ticket(db, ticket_update.id)
+    if ticket_by_id is None:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    if ticket_by_name is not None and ticket_by_name.id != ticket_by_id.id:
+        raise HTTPException(status_code=409, detail="Ticket name already exists")
+    return tickets.update_ticket(db, ticket_update)
 
 
 @app.delete("/ticket/delete", response_model=schemas.Ticket)
-def delete_ticket(ticket_id: int, db: Session = Depends(database.get_db)):
-    return ticket.delete_ticket(db, ticket_id)
+def delete_ticket(token: Annotated[str, Depends(oauth2_scheme)], ticket_id: int, db: Session = Depends(database.get_db)):
+    return tickets.delete_ticket(db, ticket_id)
+
+
+# Receives a username and password and returns a JWT token by
+# authenticate_user(username, password)
+# create_access_token(data, expires_delta)
+@app.post("/token/", response_model=Token)
+async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+                                 db: Session = Depends(database.get_db)):
+    user = authenticate_user(db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect username or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub": user.username}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}

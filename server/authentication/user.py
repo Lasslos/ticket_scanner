@@ -1,14 +1,10 @@
 from datetime import timedelta, datetime
-from typing import Annotated
 
-from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
-from jose import jwt, JWTError
+from jose import jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
-from main import oauth2_scheme, app
 from database import models, schemas
 
 # TODO: Change this to your own secret key
@@ -69,42 +65,23 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
-
 # Decodes a JWT token and looks up the user in the database
-async def get_current_user(db: Session, token: Annotated[str, Depends(oauth2_scheme)]):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-        token_data = TokenData(username=username)
-    except JWTError:
-        raise credentials_exception
-    user = get_user(db, username=token_data.username)
-    if user is None:
-        raise credentials_exception
-    return user
-
-
-# Receives a username and password and returns a JWT token by
-# authenticate_user(username, password)
-# create_access_token(data, expires_delta)
-@app.post("/token", response_model=Token)
-async def login_for_access_token(db: Session, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    user = authenticate_user(db, form_data.username, form_data.password)
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
+# async def get_current_user(db: Session, token: Annotated[str, Depends(oauth2_scheme)]):
+#    credentials_exception = HTTPException(
+#        status_code=status.HTTP_401_UNAUTHORIZED,
+#        detail="Could not validate credentials",
+#        headers={"WWW-Authenticate": "Bearer"},
+#    )
+#    try:
+#        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+#        username: str = payload.get("sub")
+#        if username is None:
+#            raise credentials_exception
+#        token_data = TokenData(username=username)
+#    except JWTError:
+#        raise credentials_exception
+#    user = get_user(db, username=token_data.username)
+#    if user is None:
+#        raise credentials_exception
+#    return user
+#
