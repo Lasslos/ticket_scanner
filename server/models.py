@@ -22,7 +22,6 @@ class Ticket(dbBase):
     is_present = Column(Boolean, default=False)
 
 
-
 class User(dbBase):
     username = Column(String, primary_key=True, index=True)
     hashed_password = Column(String)

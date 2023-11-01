@@ -7,7 +7,6 @@ from jose import jwt, JWTError
 from passlib.context import CryptContext
 from pydantic import BaseModel
 
-from database import dbBase
 from main import oauth2_scheme, app
 
 # TODO: Change this to your own secret key
