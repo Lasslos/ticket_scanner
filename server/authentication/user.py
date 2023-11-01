@@ -6,8 +6,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
 from main import oauth2_scheme, app
+from database import models, schemas
 
 # TODO: Change this to your own secret key
 SECRET_KEY = "bdb29e9c84fb7123bbd2adbea5f874607809e97cc27c0155e497cc39a409bda8"
@@ -26,12 +28,6 @@ class TokenData(BaseModel):
     username: str | None = None
 
 
-# Represents a user in the database
-class User(BaseModel):
-    username: str
-    hashed_password: str
-
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
@@ -39,14 +35,22 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-# TODO: Add your own user database
-def get_user(username: str):
-    return User(username=username, hashed_password=get_password_hash("password"))
+def get_user(db: Session, username: str) -> models.User | None:
+    return db.query(models.User).filter(models.User.username == username).first()
+
+
+def create_user(db: Session, user: schemas.UserCreate):
+    hashed_password = get_password_hash(user.password)
+    db_user = models.User(username=user.username, hashed_password=hashed_password)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
 
 
 # Authenticates a user by username and password
-def authenticate_user(username: str, password: str):
-    user = get_user(username)
+def authenticate_user(db: Session, username: str, password: str) -> models.User | bool:
+    user = get_user(db, username)
     if not user:
         return False
     if not pwd_context.verify(password, user.hashed_password):
@@ -67,7 +71,7 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 
 
 # Decodes a JWT token and looks up the user in the database
-async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
+async def get_current_user(db: Session, token: Annotated[str, Depends(oauth2_scheme)]):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -81,7 +85,7 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
         token_data = TokenData(username=username)
     except JWTError:
         raise credentials_exception
-    user = get_user(username=token_data.username)
+    user = get_user(db, username=token_data.username)
     if user is None:
         raise credentials_exception
     return user
@@ -91,8 +95,8 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)]):
 # authenticate_user(username, password)
 # create_access_token(data, expires_delta)
 @app.post("/token", response_model=Token)
-async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
-    user = authenticate_user(form_data.username, form_data.password)
+async def login_for_access_token(db: Session, form_data: Annotated[OAuth2PasswordRequestForm, Depends()]):
+    user = authenticate_user(db, form_data.username, form_data.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

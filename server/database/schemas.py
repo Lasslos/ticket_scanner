@@ -6,6 +6,7 @@ from database.models import TicketType
 
 
 class TicketBase(BaseModel):
+    id: int
     name: str
     type: TicketType
     created: datetime
@@ -18,9 +19,11 @@ class TicketCreate(TicketBase):
     pass
 
 
-class Ticket(TicketBase):
-    id: int
+class TicketUpdate(TicketBase):
+    pass
 
+
+class Ticket(TicketBase):
     class Config:
         orm_mode = True
 
