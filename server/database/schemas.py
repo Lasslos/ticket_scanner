@@ -9,7 +9,6 @@ class TicketBase(BaseModel):
     id: int
     name: str
     type: TicketType
-    created: datetime
     notes: str = ""
     entered: datetime | None = None
     is_present: bool = False
@@ -19,13 +18,21 @@ class TicketCreate(TicketBase):
     pass
 
 
-class TicketUpdate(TicketBase):
+class TicketUpdate(BaseModel):
+    id: int
+    name: str | None = None
+    type: TicketType | None = None
+    notes: str | None = None
+    entered: datetime | None = None
+    is_present: bool | None = None
     pass
 
 
 class Ticket(TicketBase):
+    created: datetime
+
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserBase(BaseModel):
@@ -38,4 +45,4 @@ class UserCreate(UserBase):
 
 class User(UserBase):
     class Config:
-        orm_mode = True
+        from_attributes = True

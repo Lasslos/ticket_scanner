@@ -1,6 +1,6 @@
 import enum
 
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum, func
 
 from database.database import dbBase
 
@@ -18,7 +18,7 @@ class Ticket(dbBase):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, unique=True, index=True)
     type = Column(Enum(TicketType))
-    created = Column(DateTime, server_default="func.now()")
+    created = Column(DateTime, server_default=func.now())
     notes = Column(String, default="")
     entered = Column(DateTime, nullable=True)
     is_present = Column(Boolean, default=False)
