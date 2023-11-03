@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 
 from database import models, schemas
 
+ADMIN_HASH = "$2b$12$rGIvzQdn2MfWfMqwVXtFduR6Bs3U4JfZkPIeu97MoEQNilRhYVodK"
 # TODO: Change this to your own secret key
 SECRET_KEY = "bdb29e9c84fb7123bbd2adbea5f874607809e97cc27c0155e497cc39a409bda8"
 ALGORITHM = "HS256"
@@ -29,6 +30,10 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 def get_password_hash(password):
     return pwd_context.hash(password)
+
+
+def check_password(password, hashed_password) -> bool:
+    return pwd_context.verify(password, hashed_password)
 
 
 def get_user(db: Session, username: str) -> models.User | None:

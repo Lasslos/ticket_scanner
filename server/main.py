@@ -6,7 +6,9 @@ from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 import tickets
-from authentication.user import Token, authenticate_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES
+from authentication import user
+from authentication.user import Token, authenticate_user, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, \
+    get_user, ADMIN_HASH, check_password
 from database import database, schemas
 from database.database import engine
 
@@ -63,8 +65,8 @@ def delete_ticket(token: Annotated[str, Depends(oauth2_scheme)], ticket_id: int,
 @app.post("/token/", response_model=Token)
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
                                  db: Session = Depends(database.get_db)):
-    user = authenticate_user(db, form_data.username, form_data.password)
-    if not user:
+    authenticated_user = authenticate_user(db, form_data.username, form_data.password)
+    if not authenticated_user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -72,6 +74,18 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
         )
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": authenticated_user.username}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+# Creates a user if the key hash matches the admin hash:
+@app.post("/user/new", response_model=schemas.User)
+def create_user(user_create: schemas.UserCreate, db: Session = Depends(database.get_db)):
+    #print(get_password_hash(user_create.key))
+    if not check_password(user_create.key, ADMIN_HASH):
+        raise HTTPException(status_code=401, detail="Incorrect admin key")
+    user_database = get_user(db, user_create.username)
+    if user_database is not None:
+        raise HTTPException(status_code=409, detail="Username already exists")
+    return user.create_user(db, user_create)
