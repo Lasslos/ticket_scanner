@@ -28,8 +28,8 @@ def get_ticket(token: Annotated[str, Depends(oauth2_scheme)], ticket_id: int, db
 
 
 @app.get("/tickets/", response_model=list[schemas.Ticket])
-def get_tickets(token: Annotated[str, Depends(oauth2_scheme)], skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db)):
-    return tickets.get_tickets(db, skip, limit)
+def get_tickets(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(database.get_db)):
+    return tickets.get_tickets(db)
 
 
 @app.post("/ticket/new", response_model=schemas.Ticket)

@@ -12,7 +12,7 @@ def get_ticket_by_name(db: Session, ticket_name: str) -> models.Ticket | None:
 
 
 def get_tickets(db: Session, skip: int = 0, limit: int = 100) -> list[models.Ticket]:
-    return db.query(models.Ticket).offset(skip).limit(limit).all()
+    return db.query(models.Ticket).all()
 
 
 def create_ticket(db: Session, ticket: schemas.TicketCreate) -> models.Ticket:
