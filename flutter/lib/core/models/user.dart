@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part '../user.freezed.dart';
-part '../user.g.dart';
+part 'user.freezed.dart';
+part 'user.g.dart';
 
 @freezed
 class User with _$User {
@@ -29,7 +29,7 @@ class UserCreate with _$UserCreate {
 class Token with _$Token {
   const factory Token({
     required String token,
-    required String token_type
+    required String token_type,
   }) = _Token;
 
   factory Token.fromJson(Map<String, dynamic> json) => _$TokenFromJson(json);

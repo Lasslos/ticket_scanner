@@ -56,6 +56,9 @@ def update_ticket(token: Annotated[str, Depends(oauth2_scheme)], ticket_update: 
 
 @app.delete("/ticket/delete", response_model=schemas.Ticket)
 def delete_ticket(token: Annotated[str, Depends(oauth2_scheme)], ticket_id: int, db: Session = Depends(database.get_db)):
+    ticket = tickets.get_ticket(db, ticket_id)
+    if ticket is None:
+        raise HTTPException(status_code=404, detail="Ticket not found")
     return tickets.delete_ticket(db, ticket_id)
 
 
@@ -82,7 +85,6 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
 # Creates a user if the key hash matches the admin hash:
 @app.post("/user/new", response_model=schemas.User)
 def create_user(user_create: schemas.UserCreate, db: Session = Depends(database.get_db)):
-    #print(get_password_hash(user_create.key))
     if not check_password(user_create.key, ADMIN_HASH):
         raise HTTPException(status_code=401, detail="Incorrect admin key")
     user_database = get_user(db, user_create.username)

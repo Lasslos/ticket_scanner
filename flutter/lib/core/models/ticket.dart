@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-part '../ticket.freezed.dart';
-part '../ticket.g.dart';
+part 'ticket.freezed.dart';
+part 'ticket.g.dart';
 
 enum TicketType {
   @JsonValue('student')
@@ -28,7 +28,6 @@ class Ticket with _$Ticket {
 @freezed
 class TicketCreate with _$TicketCreate {
   const factory TicketCreate({
-    required int id,
     required String name,
     required TicketType type,
     String? notes,
@@ -43,7 +42,6 @@ class TicketCreate with _$TicketCreate {
 @freezed
 class TicketUpdate with _$TicketUpdate {
   const factory TicketUpdate({
-    required int id,
     String? name,
     TicketType? type,
     String? notes,

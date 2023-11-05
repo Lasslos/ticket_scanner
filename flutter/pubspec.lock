@@ -217,6 +217,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.3.3"
+  dartlin:
+    dependency: "direct main"
+    description:
+      name: dartlin
+      sha256: "80764ff3d1801a086c2b802bd39ff6d306e783710741fab8e9981d2ba5ad68a1"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.6.3"
   device_info_plus:
     dependency: transitive
     description:
