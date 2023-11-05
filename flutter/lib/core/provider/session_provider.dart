@@ -6,7 +6,7 @@ import 'package:ticket_scanner/core/models/user.dart';
 import 'package:http/http.dart' as http;
 import 'package:dartlin/control_flow.dart';
 
-part 'user_provider.g.dart';
+part 'session_provider.g.dart';
 
 const String url = 'http://localhost:8000/';
 
@@ -38,7 +38,7 @@ class Session extends _$Session {
   Future<void> save(User user) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user', jsonEncode(user.toJson()));
-    ref.refresh(sessionProvider);
+    await ref.refresh(sessionProvider.future);
   }
 }
 

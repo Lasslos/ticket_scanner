@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ticket_scanner/provider/qr_code_information_provider.dart';
-import 'package:ticket_scanner/provider/ticket_provider.dart';
+import 'package:ticket_scanner/screens/provider/qr_code_information_provider.dart';
+import 'package:ticket_scanner/core/provider/ticket_provider.dart';
 
 class ValidationDisplay extends ConsumerWidget {
   const ValidationDisplay({

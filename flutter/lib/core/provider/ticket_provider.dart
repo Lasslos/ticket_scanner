@@ -4,7 +4,7 @@ import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:ticket_scanner/core/models/error.dart';
 import 'package:ticket_scanner/core/models/ticket.dart';
 import 'package:ticket_scanner/core/models/user.dart';
-import 'package:ticket_scanner/core/provider/user_provider.dart';
+import 'package:ticket_scanner/core/provider/session_provider.dart';
 import 'package:http/http.dart' as http;
 
 part 'ticket_provider.g.dart';

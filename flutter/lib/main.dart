@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ticket_scanner/screens/home_screen.dart';
-import 'package:ticket_scanner/provider/server_provider.dart';
+import 'package:ticket_scanner/screens/home_screen_old.dart';
+import 'package:ticket_scanner/screens/loading_screen.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -16,14 +16,6 @@ class MyApp extends ConsumerStatefulWidget {
 
 class _MyAppState extends ConsumerState<MyApp> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      ref.read(serverConnectionProvider.notifier).initialize();
-    });
-  }
-
-  @override
   Widget build(BuildContext context) => MaterialApp(
     title: 'Ticket Scanner',
     theme: ThemeData(
@@ -37,6 +29,6 @@ class _MyAppState extends ConsumerState<MyApp> {
       useMaterial3: true,
     ),
     themeMode: ThemeMode.dark,
-    home: const HomeScreen(),
+    home: const LoadingScreen(),
   );
 }
