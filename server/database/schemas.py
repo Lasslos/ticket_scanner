@@ -41,7 +41,7 @@ class UserBase(BaseModel):
 
 class UserCreate(UserBase):
     password: str
-    key: str
+    key: str  # Key that allows you to create an account if its hash matches the hash in the database
 
 
 class User(UserBase):
