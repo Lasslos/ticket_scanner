@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:ticket_scanner/core/models/user.dart';
 import 'package:ticket_scanner/core/provider/session_provider.dart';
+import 'package:ticket_scanner/screens/home_screen.dart';
 import 'package:ticket_scanner/screens/login_screen.dart';
 import 'package:ticket_scanner/util/logger.dart';
 
@@ -50,6 +51,16 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
       );
       return;
     }
+    getLogger().i("Session token loaded");
+    //ignore: use_build_context_synchronously
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (context) {
+          return const HomeScreen();
+        },
+      ),
+    );
   }
 
   @override

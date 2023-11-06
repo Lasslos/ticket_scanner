@@ -19,7 +19,7 @@ class Tickets extends _$Tickets {
     final response = await authenticatedRequest(
       ref.watch(sessionProvider),
           (defaultHeaders, token) => http.get(
-        Uri(host: url, path: "ticket/", queryParameters: {"ticket_id": id}),
+        baseUri.replace(path: 'ticket/', queryParameters: {"ticket_id": id}),
         headers: defaultHeaders,
       ),
     );
@@ -45,7 +45,7 @@ class Tickets extends _$Tickets {
     final response = await authenticatedRequest(
       ref.watch(sessionProvider),
           (defaultHeaders, token) => http.post(
-        Uri(host: url, path: "ticket/new/"),
+        baseUri.replace(path: 'ticket/new/'),
         headers: defaultHeaders,
         body: jsonEncode(ticketCreate.toJson()..['id'] = _id),
       ),
@@ -71,7 +71,7 @@ class Tickets extends _$Tickets {
     final response = await authenticatedRequest(
       ref.watch(sessionProvider),
       (defaultHeaders, token) => http.put(
-        Uri(host: url, path: "ticket/update/"),
+        baseUri.replace(path: 'ticket/update/'),
         headers: defaultHeaders,
         body: jsonEncode(ticketUpdate.toJson()),
       ),
@@ -99,7 +99,7 @@ class Tickets extends _$Tickets {
     final response = await authenticatedRequest(
       ref.watch(sessionProvider),
       (defaultHeaders, token) => http.delete(
-        Uri(host: url, path: "ticket/delete/", queryParameters: {"ticket_id": id}),
+        baseUri.replace(path: 'ticket/delete/', queryParameters: {"ticket_id": id}),
         headers: defaultHeaders,
       ),
     );
@@ -128,7 +128,7 @@ Future<List<Ticket>> allTickets(AllTicketsRef ref) async {
   final response = await authenticatedRequest(
     ref.watch(sessionProvider),
     (defaultHeaders, token) => http.get(
-      Uri(host: url, path: "tickets/"),
+      baseUri.replace(path: 'tickets/'),
       headers: defaultHeaders,
     ),
   );
@@ -162,7 +162,7 @@ Future<http.Response?> authenticatedRequest(
     <String, String>{
       'accept': 'application/json',
       'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
-      'Authorization': 'Bearer ${token.token}',
+      'Authorization': 'Bearer ${token.accessToken}',
     },
     token,
   );

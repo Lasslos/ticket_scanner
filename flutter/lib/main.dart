@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:ticket_scanner/screens/home_screen_old.dart';
 import 'package:ticket_scanner/screens/loading_screen.dart';
 
 void main() {

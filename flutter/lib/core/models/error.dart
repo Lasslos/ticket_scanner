@@ -47,4 +47,9 @@ const factory HttpException({
 
   factory HttpException.fromJson(Map<String, dynamic> json) =>
       _$HttpExceptionFromJson(json);
+
+  @override
+  String toString() {
+    return detail;
+  }
 }

@@ -28,8 +28,8 @@ class UserCreate with _$UserCreate {
 @freezed
 class Token with _$Token {
   const factory Token({
-    required String token,
-    required String token_type,
+    @JsonKey(name: "access_token") required String accessToken,
+    @JsonKey(name: "token_type") required String tokenType,
   }) = _Token;
 
   factory Token.fromJson(Map<String, dynamic> json) => _$TokenFromJson(json);
