@@ -10,7 +10,7 @@ class User with _$User {
     required String password,
   }) = _User;
 
-factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
+  factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 }
 
 @freezed

@@ -16,7 +16,7 @@ class HTTPValidationError with _$HTTPValidationError {
 @freezed
 class HTTPValidationErrorDetail with _$HTTPValidationErrorDetail {
   const factory HTTPValidationErrorDetail({
-    required List<dynamic> loc,
+    required dynamic loc,
     required String msg,
     required String type,
     dynamic input,
@@ -39,17 +39,17 @@ class ValidationError with _$ValidationError {
       _$ValidationErrorFromJson(json);
 }
 
-@freezed
+@Freezed(toStringOverride: false)
 class HttpException with _$HttpException {
-const factory HttpException({
+  const factory HttpException({
     required String detail,
   }) = _HttpException;
 
   factory HttpException.fromJson(Map<String, dynamic> json) =>
       _$HttpExceptionFromJson(json);
 
+  const HttpException._();
+
   @override
-  String toString() {
-    return detail;
-  }
+  String toString() => detail;
 }

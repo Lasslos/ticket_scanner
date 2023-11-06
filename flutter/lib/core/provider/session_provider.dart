@@ -11,7 +11,7 @@ part 'session_provider.g.dart';
 
 final Uri baseUri = Uri.parse("http://10.0.2.2:8000/");
 
-@riverpod
+@Riverpod(keepAlive: true)
 class Session extends _$Session {
   @override
   Future<Token?> build() async {
@@ -22,7 +22,7 @@ class Session extends _$Session {
     }
 
     final response = await http.post(
-      baseUri.replace(path: 'token/'),
+      baseUri.replace(path: 'token'),
       headers: <String, String>{
         'accept': 'application/json',
         'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
@@ -32,7 +32,7 @@ class Session extends _$Session {
     if (response.statusCode == 200) {
       return Token.fromJson(jsonDecode(response.body));
     } else {
-      throw Exception('Failed to login: ${jsonDecode(response.body)}');
+      throw Exception('Failed to login: ${response.body}');
     }
   }
 

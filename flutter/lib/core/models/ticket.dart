@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 part 'ticket.freezed.dart';
@@ -5,13 +6,22 @@ part 'ticket.g.dart';
 
 enum TicketType {
   @JsonValue('student')
-  student,
+  student(name: "Schüler", icon: Icons.school),
   @JsonValue('volunteer')
-  feature,
+  volunteer(name: "Helfer", icon: Icons.volunteer_activism);
+  
+  const TicketType({
+    required this.name,
+    required this.icon,
+  });
+
+  final String name;
+  final IconData icon;
 }
 
 @freezed
 class Ticket with _$Ticket {
+  @JsonSerializable(includeIfNull: false)
   const factory Ticket({
     required int id,
     required String name,
@@ -27,6 +37,7 @@ class Ticket with _$Ticket {
 
 @freezed
 class TicketCreate with _$TicketCreate {
+  @JsonSerializable(includeIfNull: false)
   const factory TicketCreate({
     required String name,
     required TicketType type,
@@ -41,6 +52,7 @@ class TicketCreate with _$TicketCreate {
 
 @freezed
 class TicketUpdate with _$TicketUpdate {
+  @JsonSerializable(includeIfNull: false)
   const factory TicketUpdate({
     String? name,
     TicketType? type,

@@ -19,7 +19,7 @@ class Tickets extends _$Tickets {
     final response = await authenticatedRequest(
       ref.watch(sessionProvider),
           (defaultHeaders, token) => http.get(
-        baseUri.replace(path: 'ticket/', queryParameters: {"ticket_id": id}),
+        baseUri.replace(path: 'ticket', queryParameters: {"ticket_id": id.toString()}),
         headers: defaultHeaders,
       ),
     );
@@ -37,7 +37,7 @@ class Tickets extends _$Tickets {
       case 422: // Malformed request
         throw HTTPValidationError.fromJson(jsonDecode(response.body));
       default:
-        throw Exception('Failed to load tickets: ${jsonDecode(response.body)}');
+        throw Exception('Failed to load tickets: ${response.body}');
     }
   }
 
@@ -45,7 +45,7 @@ class Tickets extends _$Tickets {
     final response = await authenticatedRequest(
       ref.watch(sessionProvider),
           (defaultHeaders, token) => http.post(
-        baseUri.replace(path: 'ticket/new/'),
+        baseUri.replace(path: 'ticket/new'),
         headers: defaultHeaders,
         body: jsonEncode(ticketCreate.toJson()..['id'] = _id),
       ),
@@ -63,7 +63,7 @@ class Tickets extends _$Tickets {
       case 422: // Malformed request
         throw HTTPValidationError.fromJson(jsonDecode(response.body));
       default:
-        throw Exception('Failed to load tickets: ${jsonDecode(response.body)}');
+        throw Exception('Failed to load tickets: ${response.body}');
     }
   }
 
@@ -71,7 +71,7 @@ class Tickets extends _$Tickets {
     final response = await authenticatedRequest(
       ref.watch(sessionProvider),
       (defaultHeaders, token) => http.put(
-        baseUri.replace(path: 'ticket/update/'),
+        baseUri.replace(path: 'ticket/update'),
         headers: defaultHeaders,
         body: jsonEncode(ticketUpdate.toJson()),
       ),
@@ -91,7 +91,7 @@ class Tickets extends _$Tickets {
       case 422: // Malformed request
         throw HTTPValidationError.fromJson(jsonDecode(response.body));
       default:
-        throw Exception('Failed to load tickets: ${jsonDecode(response.body)}');
+        throw Exception('Failed to load tickets: ${response.body}');
     }
   }
 
@@ -99,7 +99,7 @@ class Tickets extends _$Tickets {
     final response = await authenticatedRequest(
       ref.watch(sessionProvider),
       (defaultHeaders, token) => http.delete(
-        baseUri.replace(path: 'ticket/delete/', queryParameters: {"ticket_id": id}),
+        baseUri.replace(path: 'ticket/delete', queryParameters: {"ticket_id": id}),
         headers: defaultHeaders,
       ),
     );
@@ -118,7 +118,7 @@ class Tickets extends _$Tickets {
       case 422: // Malformed request
         throw HTTPValidationError.fromJson(jsonDecode(response.body));
       default:
-        throw Exception('Failed to load tickets: ${jsonDecode(response.body)}');
+        throw Exception('Failed to load tickets: ${response.body}');
     }
   }
 }
@@ -128,7 +128,7 @@ Future<List<Ticket>> allTickets(AllTicketsRef ref) async {
   final response = await authenticatedRequest(
     ref.watch(sessionProvider),
     (defaultHeaders, token) => http.get(
-      baseUri.replace(path: 'tickets/'),
+      baseUri.replace(path: 'tickets'),
       headers: defaultHeaders,
     ),
   );
@@ -139,7 +139,7 @@ Future<List<Ticket>> allTickets(AllTicketsRef ref) async {
   if (response.statusCode == 200) {
     return List<Ticket>.from(jsonDecode(response.body).map((it) => Ticket.fromJson(it)));
   } else {
-    throw Exception('Failed to load tickets: ${jsonDecode(response.body)}');
+    throw Exception('Failed to load tickets: ${response.body}');
   }
 }
 
@@ -161,7 +161,7 @@ Future<http.Response?> authenticatedRequest(
   return request(
     <String, String>{
       'accept': 'application/json',
-      'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+      'Content-Type': 'application/json; charset=UTF-8',
       'Authorization': 'Bearer ${token.accessToken}',
     },
     token,
