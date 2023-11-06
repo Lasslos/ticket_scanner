@@ -16,10 +16,10 @@ database.dbBase.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token/")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/token")
 
 
-@app.get("/ticket/", response_model=schemas.Ticket)
+@app.get("/ticket", response_model=schemas.Ticket)
 def get_ticket(token: Annotated[str, Depends(oauth2_scheme)], ticket_id: int, db: Session = Depends(database.get_db)):
     ticket = tickets.get_ticket(db, ticket_id)
     if ticket is None:
@@ -27,7 +27,7 @@ def get_ticket(token: Annotated[str, Depends(oauth2_scheme)], ticket_id: int, db
     return ticket
 
 
-@app.get("/tickets/", response_model=list[schemas.Ticket])
+@app.get("/tickets", response_model=list[schemas.Ticket])
 def get_tickets(token: Annotated[str, Depends(oauth2_scheme)], db: Session = Depends(database.get_db)):
     return tickets.get_tickets(db)
 
@@ -65,7 +65,7 @@ def delete_ticket(token: Annotated[str, Depends(oauth2_scheme)], ticket_id: int,
 # Receives a username and password and returns a JWT token by
 # authenticate_user(username, password)
 # create_access_token(data, expires_delta)
-@app.post("/token/", response_model=Token)
+@app.post("/token", response_model=Token)
 async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
                                  db: Session = Depends(database.get_db)):
     authenticated_user = authenticate_user(db, form_data.username, form_data.password)
