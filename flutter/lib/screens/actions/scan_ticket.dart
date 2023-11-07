@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 class ScanTicket extends ConsumerStatefulWidget {
-  const ScanTicket({super.key});
+  final int? id;
+  
+  const ScanTicket({required this.id, super.key});
 
   @override
   ConsumerState createState() => _ScanTicketState();

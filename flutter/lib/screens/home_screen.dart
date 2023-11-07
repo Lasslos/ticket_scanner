@@ -1,8 +1,10 @@
+import 'package:dartlin/dartlin.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ticket_scanner/screens/actions/create_ticket.dart';
 import 'package:ticket_scanner/screens/actions/edit_ticket.dart';
 import 'package:ticket_scanner/screens/actions/scan_ticket.dart';
+import 'package:ticket_scanner/screens/qr_code_scanner.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -13,6 +15,32 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _selectedIndex = 0;
+
+  late TextEditingController _idController;
+  late FocusNode _idFocusNode;
+  int? _id;
+
+  final _formKey = GlobalKey<FormState>();
+
+  @override
+  void initState() {
+    _idController = TextEditingController(text: "");
+    _idFocusNode = FocusNode()..addListener(() {
+      if (!_idFocusNode.hasFocus && _formKey.currentState!.validate()) {
+        setState(() {
+          _formKey.currentState!.save();
+        });
+      }
+    });
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _idController.dispose();
+    _idFocusNode.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,12 +63,59 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: IndexedStack(
-            index: _selectedIndex,
-            children: const [
-              CreateTicket(),
-              EditTicket(),
-              ScanTicket(),
+          child: ListView(
+            children: [
+              Form(
+                key: _formKey,
+                child: TextFormField(
+                  focusNode: _idFocusNode,
+                  autocorrect: false,
+                  controller: _idController,
+                  keyboardType: TextInputType.number,
+                  textInputAction: TextInputAction.next,
+                  validator: (value) {
+                    if (value == null || value.isEmpty || int.tryParse(value) == null) {
+                      return 'Bitte gib eine ID ein.';
+                    }
+                    return null;
+                  },
+                  onSaved: (value) {
+                    _id = int.parse(value!);
+                  },
+                  decoration: InputDecoration(
+                    labelText: 'ID',
+                    suffixIcon: IconButton(
+                      icon: const Icon(Icons.qr_code_2),
+                      onPressed: () async {
+                        final scanData = await showScanDialog(context);
+                        if (scanData == null) {
+                          return;
+                        }
+                        int? newId = scanData.code?.let((it) => int.tryParse(it));
+                        if (newId != null) {
+                          setState(() {
+                            _idController.text = newId.toString();
+                          });
+                          if (_formKey.currentState!.validate()) {
+                            setState(() {
+                              _formKey.currentState!.save();
+                            });
+                          }
+                        }
+                      },
+                    ),
+                  ),
+                ),
+              ),
+
+              IndexedStack(
+                index: _selectedIndex,
+                children: [
+                  CreateTicket(id: _id),
+                  EditTicket(id: _id),
+                  ScanTicket(id: _id),
+                ],
+              ),
             ],
           ),
         ),

@@ -3,22 +3,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ticket_scanner/core/models/ticket.dart';
 import 'package:ticket_scanner/core/provider/ticket_provider.dart';
-import 'package:ticket_scanner/screens/qr_code_scanner.dart';
 import 'package:ticket_scanner/screens/shared/ticket_widget.dart';
 import 'package:ticket_scanner/util/logger.dart';
 
 class CreateTicket extends ConsumerStatefulWidget {
-  const CreateTicket({super.key});
+  final int? id;
+
+  const CreateTicket({required this.id, super.key});
 
   @override
   ConsumerState createState() => _CreateTicketState();
 }
 
 class _CreateTicketState extends ConsumerState<CreateTicket> {
-  late TextEditingController _idController;
   List<FocusNode> focusNodes = [];
 
-  int? _id;
   TicketCreate _ticketCreate = const TicketCreate(
     name: '',
     type: TicketType.student,
@@ -32,20 +31,11 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
   @override
   void initState() {
     super.initState();
-    _idController = TextEditingController(text: "");
-    focusNodes = List.generate(4, (_) => FocusNode());
-    // Listen for id changes and update id if applicable
-    focusNodes[0].addListener(() {
-      if (!focusNodes[0].hasFocus) {
-        String value = _idController.text;
-        int.tryParse(value)?.let((it) => setState(() => _id = it));
-      }
-    });
+    focusNodes = List.generate(3, (_) => FocusNode());
   }
 
   @override
   void dispose() {
-    _idController.dispose();
     for (var element in focusNodes) {
       element.dispose();
     }
@@ -54,31 +44,7 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
 
   @override
   Widget build(BuildContext context) {
-    //A dialog with fields for id, name, type and notes
-    _id?.let(
-      (it) => ref.listen(
-        ticketsProvider(it),
-        (oldState, newState) {
-          newState.when(
-            data: (data) {},
-            error: (err, stack) {
-              setState(() {
-                isLoading = false;
-                _error = newState.error.toString();
-              });
-            },
-            loading: () {
-              setState(() {
-                isLoading = true;
-                _error = null;
-              });
-            },
-          );
-        }
-      ),
-    );
-
-    Ticket? ticket = _id?.let(
+    Ticket? ticket = widget.id?.let(
       (id) => ref.watch(ticketsProvider(id)).maybeWhen(
         data: (data) => data,
         orElse: () => null,
@@ -87,47 +53,11 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
 
     return Form(
       key: _formKey,
-      child: ListView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
         children: [
           TextFormField(
             focusNode: focusNodes[0],
-            autocorrect: false,
-            controller: _idController,
-            keyboardType: TextInputType.number,
-            textInputAction: TextInputAction.next,
-            validator: (value) {
-              if (value == null || value.isEmpty || int.tryParse(value) == null) {
-                return 'Bitte gib eine ID ein.';
-              }
-              return null;
-            },
-            onSaved: (value) {
-              _id = int.parse(value!);
-            },
-            onEditingComplete: () {
-              FocusScope.of(context).requestFocus(focusNodes[1]);
-            },
-            decoration: InputDecoration(
-              labelText: 'ID',
-              suffixIcon: IconButton(
-                icon: const Icon(Icons.qr_code_2),
-                onPressed: () async {
-                  final scanData = await showScanDialog(context);
-                  if (scanData == null) {
-                    return;
-                  }
-                  int? newId = scanData.code?.let((it) => int.tryParse(it));
-                  if (newId != null) {
-                    setState(() {
-                      _idController.text = newId.toString();
-                    });
-                  }
-                },
-              ),
-            ),
-          ),
-          TextFormField(
-            focusNode: focusNodes[1],
             autocorrect: false,
             keyboardType: TextInputType.name,
             textInputAction: TextInputAction.next,
@@ -168,7 +98,7 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
           ),
           const SizedBox(height: 8),
           TextFormField(
-            focusNode: focusNodes[2],
+            focusNode: focusNodes[1],
             autocorrect: true,
             keyboardType: TextInputType.multiline,
             maxLines: null,
@@ -198,12 +128,12 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
               if (isLoading) const LinearProgressIndicator(),
               const Spacer(),
               ElevatedButton(
-                focusNode: focusNodes[3],
+                focusNode: focusNodes[2],
                 onPressed: () async {
-                  if (_formKey.currentState!.validate()) {
+                  if (_formKey.currentState!.validate() && widget.id != null) {
                     _formKey.currentState!.save();
                     try {
-                      await ref.read(ticketsProvider(_id!).notifier).createTicket(_ticketCreate);
+                      await ref.read(ticketsProvider(widget.id!).notifier).createTicket(_ticketCreate);
                     } catch (e, s) {
                       getLogger().e('Failed to create ticket', error: e, stackTrace: s);
                       setState(() {
