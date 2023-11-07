@@ -92,7 +92,7 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
           ErrorSubmitRow(
             error: _error,
             isLoading: _isLoading,
-            submitButton: ElevatedButton(
+            submitButton: FilledButton(
               focusNode: focusNodes[2],
               onPressed: () async {
                 FocusScope.of(context).unfocus();

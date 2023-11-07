@@ -34,11 +34,12 @@ class TicketWidget extends StatelessWidget {
       ListTile(
         title: Text("Am ${DateFormat("dd. MMMM yyyy").format(ticket.created)} um ${DateFormat("HH:mm").format(ticket.created)} erstellt"),
       ),
-      if (ticket.entered != null)
-        ListTile(
-          title: Text(DateFormat("Am DD.MM.YYYY um HOUR24:MINUTE eingelassen").format(ticket.entered!)),
-          subtitle: Text("${ticket.isPresent ? "" : "Nicht "}anwesend"),
-        ),
+      if (ticket.entered != null) ListTile(
+        title: Text("Am ${DateFormat("dd. MMMM yyyy").format(ticket.entered!)} um ${DateFormat("HH:mm").format(ticket.entered!)} eingelassen"),
+      ),
+      ListTile(
+        title: Text("${ticket.isPresent ? "A" : "Nicht a"}nwesend"),
+      ),
     ],
   );
 }

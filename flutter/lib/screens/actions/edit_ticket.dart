@@ -106,7 +106,7 @@ class _EditTicketState extends ConsumerState<EditTicket> {
               },
               child: const Text('Leeren'),
             ),
-            submitButton: ElevatedButton(
+            submitButton: FilledButton(
               focusNode: focusNodes[2],
               onPressed: () async {
                 FocusScope.of(context).unfocus();

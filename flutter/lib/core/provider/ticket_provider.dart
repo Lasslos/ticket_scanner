@@ -6,7 +6,6 @@ import 'package:ticket_scanner/core/models/ticket.dart';
 import 'package:ticket_scanner/core/models/user.dart';
 import 'package:ticket_scanner/core/provider/session_provider.dart';
 import 'package:http/http.dart' as http;
-import 'package:ticket_scanner/util/logger.dart';
 
 part 'ticket_provider.g.dart';
 
