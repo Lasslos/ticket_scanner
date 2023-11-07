@@ -6,6 +6,7 @@ import 'package:ticket_scanner/core/models/ticket.dart';
 import 'package:ticket_scanner/core/models/user.dart';
 import 'package:ticket_scanner/core/provider/session_provider.dart';
 import 'package:http/http.dart' as http;
+import 'package:ticket_scanner/util/logger.dart';
 
 part 'ticket_provider.g.dart';
 
@@ -73,7 +74,7 @@ class Tickets extends _$Tickets {
       (defaultHeaders, token) => http.put(
         baseUri.replace(path: 'ticket/update'),
         headers: defaultHeaders,
-        body: jsonEncode(ticketUpdate.toJson()),
+        body: jsonEncode(ticketUpdate.toJson()..['id'] = _id),
       ),
     );
     if (response == null) {
@@ -95,11 +96,11 @@ class Tickets extends _$Tickets {
     }
   }
 
-  Future<void> deleteTicket(int id) async {
+  Future<void> deleteTicket() async {
     final response = await authenticatedRequest(
       ref.watch(sessionProvider),
       (defaultHeaders, token) => http.delete(
-        baseUri.replace(path: 'ticket/delete', queryParameters: {"ticket_id": id}),
+        baseUri.replace(path: 'ticket/delete', queryParameters: {"ticket_id": id.toString()}),
         headers: defaultHeaders,
       ),
     );

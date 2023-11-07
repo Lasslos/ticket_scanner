@@ -40,8 +40,8 @@ class NameField extends StatelessWidget {
 // Takes a selected ticket type, a function to call when the selection changes,
 // and a bool to allow the selection of no ticket.
 class TicketTypeSelection extends StatelessWidget {
-  final TicketType selected;
-  final Function (TicketType) onSelectionChanged;
+  final TicketType? selected;
+  final Function (TicketType?) onSelectionChanged;
   final bool allowNone;
 
   const TicketTypeSelection({
@@ -49,7 +49,7 @@ class TicketTypeSelection extends StatelessWidget {
     required this.onSelectionChanged,
     this.allowNone = false,
     super.key,
-  });
+  }) : assert(allowNone || selected != null, "Selected must not be null if allowNone is false");
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +57,7 @@ class TicketTypeSelection extends StatelessWidget {
       if (allowNone) const ButtonSegment(
         value: null,
         icon: Icon(Icons.remove),
-        label: Text('Kein Ticket'),
+        label: Text('Keine Änderung'),
       ),
       ...TicketType.values.map(
             (type) => ButtonSegment(
@@ -71,7 +71,7 @@ class TicketTypeSelection extends StatelessWidget {
       segments: segments,
       selected: { selected },
       onSelectionChanged: (selection) {
-        onSelectionChanged(selection.first!);
+        onSelectionChanged(selection.first);
       },
     );
   }
@@ -117,27 +117,30 @@ class NotesField extends StatelessWidget {
 class ErrorSubmitRow extends StatelessWidget {
   final String? error;
   final bool isLoading;
+  final Widget? clearButton;
   final Widget submitButton;
 
   const ErrorSubmitRow({
     required this.submitButton,
     required this.error,
-    this.isLoading = false,
+    required this.isLoading,
+    this.clearButton,
     super.key,
   });
 
   @override
   Widget build(BuildContext context) => Row(
     children: [
-      if (error != null && !isLoading) SizedBox(
-        width: MediaQuery.of(context).size.width * 0.6,
+      if (error != null && !isLoading) Expanded(
         child: Text(
           error!,
           style: Theme.of(context).textTheme.labelLarge?.copyWith(color: Theme.of(context).colorScheme.error),
         ),
       ),
-      if (isLoading) const LinearProgressIndicator(),
+      if (isLoading) const Expanded(child: LinearProgressIndicator()),
       const Spacer(),
+      if (clearButton != null) clearButton!,
+      if (clearButton != null) const SizedBox(width: 8),
       submitButton,
     ],
   );

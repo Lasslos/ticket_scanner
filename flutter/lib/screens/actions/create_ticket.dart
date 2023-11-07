@@ -27,7 +27,7 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
   final _formKey = GlobalKey<FormState>();
 
   String? _error;
-  bool isLoading = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -76,7 +76,7 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
             child: TicketTypeSelection(
               selected: _ticketCreate.type,
               onSelectionChanged: (selected) => setState(() {
-                _ticketCreate = _ticketCreate.copyWith(type: selected);
+                _ticketCreate = _ticketCreate.copyWith(type: selected!);
               }),
             ),
           ),
@@ -88,15 +88,19 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
               _ticketCreate = _ticketCreate.copyWith(notes: value);
             },
           ),
-          const SizedBox(height: 48),
+          const SizedBox(height: 32),
           ErrorSubmitRow(
             error: _error,
-            isLoading: isLoading,
+            isLoading: _isLoading,
             submitButton: ElevatedButton(
               focusNode: focusNodes[2],
               onPressed: () async {
+                FocusScope.of(context).unfocus();
                 if (_formKey.currentState!.validate() && widget.id != null) {
                   _formKey.currentState!.save();
+                  setState(() {
+                    _isLoading = true;
+                  });
                   try {
                     await ref.read(ticketsProvider(widget.id!).notifier).createTicket(_ticketCreate);
                   } catch (e, s) {
@@ -106,8 +110,11 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
                     });
                     return;
                   }
+                  _formKey.currentState!.reset();
                   setState(() {
+                    _ticketCreate = const TicketCreate(name: '', type: TicketType.student, notes: null);
                     _error = null;
+                    _isLoading = false;
                   });
                 }
               },
