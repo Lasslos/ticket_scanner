@@ -1,10 +1,10 @@
 import 'package:dartlin/control_flow.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ticket_scanner/core/models/ticket.dart';
 import 'package:ticket_scanner/core/provider/ticket_provider.dart';
 import 'package:ticket_scanner/screens/qr_code_scanner.dart';
+import 'package:ticket_scanner/screens/shared/ticket_widget.dart';
 import 'package:ticket_scanner/util/logger.dart';
 
 class CreateTicket extends ConsumerStatefulWidget {
@@ -15,14 +15,17 @@ class CreateTicket extends ConsumerStatefulWidget {
 }
 
 class _CreateTicketState extends ConsumerState<CreateTicket> {
+  late TextEditingController _idController;
+  List<FocusNode> focusNodes = [];
+
   int? _id;
-  TextEditingController? _idController;
   TicketCreate _ticketCreate = const TicketCreate(
     name: '',
     type: TicketType.student,
     notes: null,
   );
   final _formKey = GlobalKey<FormState>();
+
   String? _error;
   bool isLoading = false;
 
@@ -30,6 +33,23 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
   void initState() {
     super.initState();
     _idController = TextEditingController(text: "");
+    focusNodes = List.generate(4, (_) => FocusNode());
+    // Listen for id changes and update id if applicable
+    focusNodes[0].addListener(() {
+      if (!focusNodes[0].hasFocus) {
+        String value = _idController.text;
+        int.tryParse(value)?.let((it) => setState(() => _id = it));
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _idController.dispose();
+    for (var element in focusNodes) {
+      element.dispose();
+    }
+    super.dispose();
   }
 
   @override
@@ -40,28 +60,7 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
         ticketsProvider(it),
         (oldState, newState) {
           newState.when(
-            data: (data) {
-              setState(() {
-                isLoading = false;
-                _error = null;
-                _id=null;
-                _idController!.text = "";
-                _ticketCreate = const TicketCreate(
-                  name: '',
-                  type: TicketType.student,
-                  notes: null,
-                );
-                _formKey.currentState!.reset();
-              });
-              HapticFeedback.lightImpact();
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text('Ticket ${data!.name} wurde in der Datenbank gespeichert.'),
-                  showCloseIcon: true,
-                  behavior: SnackBarBehavior.floating,
-                ),
-              );
-            },
+            data: (data) {},
             error: (err, stack) {
               setState(() {
                 isLoading = false;
@@ -79,11 +78,35 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
       ),
     );
 
+    Ticket? ticket = _id?.let(
+      (id) => ref.watch(ticketsProvider(id)).maybeWhen(
+        data: (data) => data,
+        orElse: () => null,
+      ),
+    );
+
     return Form(
       key: _formKey,
       child: ListView(
         children: [
           TextFormField(
+            focusNode: focusNodes[0],
+            autocorrect: false,
+            controller: _idController,
+            keyboardType: TextInputType.number,
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty || int.tryParse(value) == null) {
+                return 'Bitte gib eine ID ein.';
+              }
+              return null;
+            },
+            onSaved: (value) {
+              _id = int.parse(value!);
+            },
+            onEditingComplete: () {
+              FocusScope.of(context).requestFocus(focusNodes[1]);
+            },
             decoration: InputDecoration(
               labelText: 'ID',
               suffixIcon: IconButton(
@@ -96,27 +119,21 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
                   int? newId = scanData.code?.let((it) => int.tryParse(it));
                   if (newId != null) {
                     setState(() {
-                      _idController!.text = newId.toString();
+                      _idController.text = newId.toString();
                     });
                   }
                 },
               ),
             ),
-            keyboardType: TextInputType.number,
-            validator: (value) {
-              if (value == null || value.isEmpty || int.tryParse(value) == null) {
-                return 'Bitte gib eine ID ein.';
-              }
-              return null;
-            },
-            onSaved: (value) {
-              _id = int.parse(value!);
-            },
           ),
           TextFormField(
-            decoration: const InputDecoration(
-              labelText: 'Name',
-            ),
+            focusNode: focusNodes[1],
+            autocorrect: false,
+            keyboardType: TextInputType.name,
+            textInputAction: TextInputAction.next,
+            onEditingComplete: () {
+              FocusScope.of(context).requestFocus(focusNodes[2]);
+            },
             validator: (value) {
               if (value == null || value.isEmpty) {
                 return 'Bitte gib einen Namen ein.';
@@ -126,6 +143,9 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
             onSaved: (value) {
               _ticketCreate = _ticketCreate.copyWith(name: value!);
             },
+            decoration: const InputDecoration(
+              labelText: 'Name',
+            ),
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -148,6 +168,15 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
           ),
           const SizedBox(height: 8),
           TextFormField(
+            focusNode: focusNodes[2],
+            autocorrect: true,
+            keyboardType: TextInputType.multiline,
+            maxLines: null,
+            textInputAction: TextInputAction.newline,
+            enableSuggestions: true,
+            onEditingComplete: () {
+              FocusScope.of(context).requestFocus(focusNodes[3]);
+            },
             decoration: const InputDecoration(
               labelText: 'Notizen',
             ),
@@ -169,6 +198,7 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
               if (isLoading) const LinearProgressIndicator(),
               const Spacer(),
               ElevatedButton(
+                focusNode: focusNodes[3],
                 onPressed: () async {
                   if (_formKey.currentState!.validate()) {
                     _formKey.currentState!.save();
@@ -189,6 +219,13 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
                 child: const Text('Verkaufen'),
               ),
             ],
+          ),
+          if (ticket != null) const Divider(height: 32),
+          if (ticket != null) Card(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: TicketWidget(ticket: ticket),
+            ),
           ),
         ],
       ),

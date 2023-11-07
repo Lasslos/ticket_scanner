@@ -13,20 +13,24 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class LoginScreenState extends ConsumerState<LoginScreen> {
-  late TextEditingController _usernameFieldController;
-  late TextEditingController _passwordFieldController;
   var showPassword = false;
   List<FocusNode> focusNodes = [];
+
+  final formKey = GlobalKey<FormState>();
+  User user = const User(username: "", password: "");
 
   @override
   void initState() {
     super.initState();
-    _usernameFieldController = TextEditingController();
-    _passwordFieldController = TextEditingController();
-    for (var i = 0; i < 3; i++) {
-      focusNodes.add(FocusNode());
+    focusNodes = List.generate(3, (_) => FocusNode());
+  }
+
+  @override
+  void dispose() {
+    for (var element in focusNodes) {
+      element.dispose();
     }
-    focusNodes[0].requestFocus();
+    super.dispose();
   }
 
   @override
@@ -48,106 +52,127 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
           child: Card(
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Text(
-                    "Login",
-                    style: Theme.of(context)
-                        .textTheme
-                        .displaySmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "Melde dich mit deinem TicketScanner-Konto an",
-                    style: Theme.of(context).textTheme.labelMedium,
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    autofocus: true,
-                    focusNode: focusNodes[0],
-                    autocorrect: false,
-                    autofillHints: const [AutofillHints.username],
-                    keyboardType: TextInputType.text,
-                    textInputAction: TextInputAction.next,
-                    controller: _usernameFieldController,
-                    onEditingComplete: () {
-                      FocusScope.of(context).requestFocus(focusNodes[0]);
-                    },
-                    decoration: const InputDecoration(
-                      labelText: "Benutzername",
-                      prefixIcon: Icon(Icons.person),
+              child: Form(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Login",
+                      style: Theme.of(context)
+                          .textTheme
+                          .displaySmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
                     ),
-                  ),
-                  const SizedBox(height: 8),
-                  TextField(
-                    focusNode: focusNodes[1],
-                    autocorrect: false,
-                    enableSuggestions: false,
-                    obscureText: !showPassword,
-                    keyboardType: TextInputType.visiblePassword,
-                    autofillHints: const [AutofillHints.password],
-                    textInputAction: TextInputAction.next,
-                    controller: _passwordFieldController,
-                    onEditingComplete: () {
-                      FocusScope.of(context).requestFocus(focusNodes[1]);
-                    },
-                    decoration: InputDecoration(
-                      labelText: "Passwort",
-                      prefixIcon: const Icon(Icons.lock),
-                      suffixIcon: IconButton(
-                        icon: showPassword
-                            ? const Icon(Icons.visibility)
-                            : const Icon(Icons.visibility_off),
-                        onPressed: () {
-                          setState(() {
-                            showPassword = !showPassword;
-                          });
-                        },
+                    const SizedBox(height: 8),
+                    Text(
+                      "Melde dich mit deinem Konto an",
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      autofocus: true,
+                      focusNode: focusNodes[0],
+                      autocorrect: false,
+                      autofillHints: const [AutofillHints.username],
+                      keyboardType: TextInputType.text,
+                      textInputAction: TextInputAction.next,
+                      decoration: const InputDecoration(
+                        labelText: "Benutzername",
+                        prefixIcon: Icon(Icons.person),
+                      ),
+                      onEditingComplete: () {
+                        FocusScope.of(context).requestFocus(focusNodes[1]);
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Bitte gib deinen Benutzernamen ein";
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        user = user.copyWith(username: value!);
+                      },
+                    ),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      focusNode: focusNodes[1],
+                      autocorrect: false,
+                      enableSuggestions: false,
+                      obscureText: !showPassword,
+                      keyboardType: TextInputType.visiblePassword,
+                      autofillHints: const [AutofillHints.password],
+                      textInputAction: TextInputAction.next,
+                      onEditingComplete: () {
+                        FocusScope.of(context).requestFocus(focusNodes[1]);
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Bitte gib dein Passwort ein";
+                        }
+                        return null;
+                      },
+                      onSaved: (value) {
+                        user = user.copyWith(password: value!);
+                      },
+                      decoration: InputDecoration(
+                        labelText: "Passwort",
+                        prefixIcon: const Icon(Icons.lock),
+                        suffixIcon: IconButton(
+                          icon: showPassword
+                              ? const Icon(Icons.visibility)
+                              : const Icon(Icons.visibility_off),
+                          onPressed: () {
+                            setState(() {
+                              showPassword = !showPassword;
+                            });
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    message,
-                    style: Theme.of(context)
-                        .textTheme
-                        .labelMedium
-                        ?.copyWith(color: Colors.red),
-                  ),
-                  const SizedBox(height: 8),
-                  isLoading
-                      ? const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: SizedBox(
-                            height: 48,
-                            child: Center(
-                              child: LinearProgressIndicator(),
+                    const SizedBox(height: 12),
+                    Text(
+                      message,
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelMedium
+                          ?.copyWith(color: Colors.red),
+                    ),
+                    const SizedBox(height: 8),
+                    isLoading
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: SizedBox(
+                              height: 48,
+                              child: Center(
+                                child: LinearProgressIndicator(),
+                              ),
                             ),
+                          )
+                        : ElevatedButton(
+                            focusNode: focusNodes[2],
+                            style: ButtonStyle(
+                              backgroundColor: MaterialStateProperty.all(
+                                Theme.of(context).colorScheme.primary,
+                              ),
+                              foregroundColor: MaterialStateProperty.all(
+                                Theme.of(context).colorScheme.onPrimary,
+                              ),
+                              textStyle: MaterialStateProperty.all(
+                                Theme.of(context).textTheme.labelLarge,
+                              ),
+                            ),
+                            onPressed: () {
+                              FocusScope.of(context).unfocus();
+                              if (formKey.currentState!.validate()) {
+                                formKey.currentState!.save();
+                                _login();
+                              }
+                            },
+                            child: const Text("Log In"),
                           ),
-                        )
-                      : ElevatedButton(
-                          focusNode: focusNodes[2],
-                          style: ButtonStyle(
-                            backgroundColor: MaterialStateProperty.all(
-                              Theme.of(context).colorScheme.primary,
-                            ),
-                            foregroundColor: MaterialStateProperty.all(
-                              Theme.of(context).colorScheme.onPrimary,
-                            ),
-                            textStyle: MaterialStateProperty.all(
-                              Theme.of(context).textTheme.labelLarge,
-                            ),
-                          ),
-                          onPressed: () {
-                            FocusScope.of(context).unfocus();
-                            _login();
-                          },
-                          child: const Text("Log In"),
-                        ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -157,11 +182,6 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   void _login() async {
-    User user = User(
-      username: _usernameFieldController.text,
-      password: _passwordFieldController.text,
-    );
-
     await ref.read(sessionProvider.notifier).save(user);
     ref.read(sessionProvider).when(
       data: (token) {

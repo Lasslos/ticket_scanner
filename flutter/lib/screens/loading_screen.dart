@@ -38,6 +38,7 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
         _message = e.toString();
         allowGoToLoginScreen = true;
       });
+      return;
     }
     if (sessionToken == null) {
       //ignore: use_build_context_synchronously
@@ -98,7 +99,7 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
                   ),
                 );
               },
-              child: const Text("Go to"),
+              child: const Text("Go to Login Screen"),
             ),
             const Spacer(),
           ],
