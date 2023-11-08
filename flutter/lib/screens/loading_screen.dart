@@ -74,11 +74,11 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Spacer(),
-            const SizedBox(
+            SizedBox(
               height: 200,
               child: AspectRatio(
                 aspectRatio: 1,
-                child: Placeholder(),
+                child: Image.asset('assets/logo.png'),
               ),
             ),
             const Spacer(flex: 1),
