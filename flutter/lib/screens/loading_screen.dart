@@ -16,7 +16,8 @@ class LoadingScreen extends ConsumerStatefulWidget {
 
 class _LoadingScreenState extends ConsumerState<LoadingScreen> {
   String _message = "Loading session";
-  bool allowGoToLoginScreen = false;
+  bool _isLoading = true;
+  bool _allowGoToLoginScreen = false;
 
   @override
   void initState() {
@@ -36,7 +37,8 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
       getLogger().e("Failed to load session token", error: e, stackTrace: s);
       setState(() {
         _message = e.toString();
-        allowGoToLoginScreen = true;
+        _isLoading = false;
+        _allowGoToLoginScreen = true;
       });
       return;
     }
@@ -80,15 +82,15 @@ class _LoadingScreenState extends ConsumerState<LoadingScreen> {
               ),
             ),
             const Spacer(flex: 1),
-            const CircularProgressIndicator(),
+            if (_isLoading) const CircularProgressIndicator(),
             const SizedBox(height: 25),
             Text(
               _message,
               style: GoogleFonts.lato(fontSize: 16),
               textAlign: TextAlign.center,
             ),
-            if (allowGoToLoginScreen) const SizedBox(height: 25),
-            if (allowGoToLoginScreen) TextButton(
+            if (_allowGoToLoginScreen) const SizedBox(height: 25),
+            if (_allowGoToLoginScreen) TextButton(
               onPressed: () {
                 Navigator.pushReplacement(
                   context,
