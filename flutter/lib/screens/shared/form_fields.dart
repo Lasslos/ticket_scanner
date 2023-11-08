@@ -57,7 +57,6 @@ class TicketTypeSelection extends StatelessWidget {
       if (allowNone) const ButtonSegment(
         value: null,
         icon: Icon(Icons.remove),
-        label: Text('Keine Änderung'),
       ),
       ...TicketType.values.map(
             (type) => ButtonSegment(
@@ -70,6 +69,7 @@ class TicketTypeSelection extends StatelessWidget {
     return SegmentedButton(
       segments: segments,
       selected: { selected },
+      showSelectedIcon: !allowNone, //If allowNone, don't show the selectedIcon as it is clear from context
       onSelectionChanged: (selection) {
         onSelectionChanged(selection.first);
       },

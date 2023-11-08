@@ -108,14 +108,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               ),
 
-              IndexedStack(
-                index: _selectedIndex,
-                children: [
-                  CreateTicket(id: _id),
-                  EditTicket(id: _id),
-                  ScanTicket(id: _id),
-                ],
-              ),
+              if (_selectedIndex == 0) CreateTicket(id: _id)
+              else if (_selectedIndex == 1) EditTicket(id: _id)
+              else if (_selectedIndex == 2) ScanTicket(id: _id),
             ],
           ),
         ),
