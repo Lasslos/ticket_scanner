@@ -16,7 +16,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
   var showPassword = false;
   List<FocusNode> focusNodes = [];
 
-  final formKey = GlobalKey<FormState>();
+  final _formKey = GlobalKey<FormState>();
   User user = const User(username: "", password: "");
 
   @override
@@ -53,6 +53,7 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Form(
+                key: _formKey,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.center,
@@ -164,8 +165,8 @@ class LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                             onPressed: () {
                               FocusScope.of(context).unfocus();
-                              if (formKey.currentState!.validate()) {
-                                formKey.currentState!.save();
+                              if (_formKey.currentState!.validate()) {
+                                _formKey.currentState!.save();
                                 _login();
                               }
                             },
