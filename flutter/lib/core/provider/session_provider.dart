@@ -40,6 +40,7 @@ class Session extends _$Session {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('user', jsonEncode(user.toJson()));
     try {
+      // ignore: unused_result
       await ref.refresh(sessionProvider.future);
     } catch (e) {
       getLogger().e('Failed to refresh session: $e');

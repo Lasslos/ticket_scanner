@@ -26,10 +26,10 @@ Future<Barcode?> showScanDialog(BuildContext context) {
               padding: const EdgeInsets.all(8.0),
               child: QRCodeScanner(
                 onScan: (Barcode barcode) async {
-                  Navigator.of(dialogContext).maybePop(barcode.rawValue);
+                  Navigator.of(dialogContext).maybePop(barcode);
                   if ((await Vibration.hasVibrator())!) {
-                  getLogger().d("Vibrating, data: ${barcode.rawValue}");
-                  await Vibration.vibrate(amplitude: 64, duration: 32);
+                    getLogger().d("Vibrating, data: ${barcode.rawValue}");
+                    await Vibration.vibrate(amplitude: 64, duration: 32);
                   }
                 },
               ),
@@ -62,7 +62,14 @@ class QRCodeScanner extends ConsumerStatefulWidget {
 }
 
 class _QRCodeScannerState extends ConsumerState<QRCodeScanner> {
-  MobileScannerController cameraController = MobileScannerController();
+  static bool torchEnabled = false;
+  static CameraFacing cameraFacing = CameraFacing.back;
+
+  MobileScannerController cameraController = MobileScannerController(
+    detectionTimeoutMs: 500,
+    torchEnabled: torchEnabled,
+    facing: cameraFacing,
+  );
 
   @override
   Widget build(BuildContext context) => Column(
@@ -105,7 +112,10 @@ class _QRCodeScannerState extends ConsumerState<QRCodeScanner> {
                       },
                     ),
                     iconSize: 32.0,
-                    onPressed: () => cameraController.toggleTorch(),
+                    onPressed: () {
+                      cameraController.toggleTorch();
+                      torchEnabled = !torchEnabled;
+                    },
                   ),
                   IconButton(
                     color: Colors.white,
@@ -121,7 +131,10 @@ class _QRCodeScannerState extends ConsumerState<QRCodeScanner> {
                       },
                     ),
                     iconSize: 32.0,
-                    onPressed: () => cameraController.switchCamera(),
+                    onPressed: () {
+                      cameraController.switchCamera();
+                      cameraFacing = cameraFacing == CameraFacing.back ? CameraFacing.front : CameraFacing.back;
+                    },
                   ),
                 ],
               ),

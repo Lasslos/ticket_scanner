@@ -57,6 +57,11 @@ class _ScanTicketState extends ConsumerState<ScanTicket> {
             ),
           ],
         ),
+        if (ticket == null) ...[
+          const SizedBox(height: 16),
+          Text("Ticket ${widget.id} konnte nicht gefunden werden.", style: Theme.of(context).textTheme.titleSmall),
+          const SizedBox(height: 16),
+        ],
       ],
     );
   }

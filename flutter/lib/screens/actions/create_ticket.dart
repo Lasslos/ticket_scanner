@@ -57,77 +57,102 @@ class _CreateTicketState extends ConsumerState<CreateTicket> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          NameField(
-            focusNode: focusNodes[0],
-            nextFocusNode: focusNodes[1],
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Bitte gib einen Namen ein.';
-              }
-              return null;
-            },
-            onSaved: (value) {
-              _ticketCreate = _ticketCreate.copyWith(name: value!);
-            },
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: TicketTypeSelection(
-              selected: _ticketCreate.type,
-              onSelectionChanged: (selected) => setState(() {
-                _ticketCreate = _ticketCreate.copyWith(type: selected!);
-              }),
-            ),
-          ),
-          const SizedBox(height: 8),
-          NotesField(
-            focusNode: focusNodes[1],
-            nextFocusNode: focusNodes[2],
-            onSaved: (value) {
-              _ticketCreate = _ticketCreate.copyWith(notes: value);
-            },
-          ),
-          const SizedBox(height: 32),
-          ErrorSubmitRow(
-            error: _error,
-            isLoading: _isLoading,
-            submitButton: FilledButton(
-              focusNode: focusNodes[2],
-              onPressed: () async {
-                FocusScope.of(context).unfocus();
-                if (_formKey.currentState!.validate() && widget.id != null) {
-                  _formKey.currentState!.save();
-                  setState(() {
-                    _isLoading = true;
-                  });
-                  try {
-                    await ref.read(ticketsProvider(widget.id!).notifier).createTicket(_ticketCreate);
-                  } catch (e, s) {
-                    getLogger().e('Failed to create ticket', error: e, stackTrace: s);
-                    setState(() {
-                      _error = e.toString();
-                    });
-                    return;
-                  }
-                  _formKey.currentState!.reset();
-                  setState(() {
-                    _ticketCreate = const TicketCreate(name: '', type: TicketType.student, notes: null);
-                    _error = null;
-                    _isLoading = false;
-                  });
+          if (ticket == null) ...[
+            NameField(
+              focusNode: focusNodes[0],
+              nextFocusNode: focusNodes[1],
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Bitte gib einen Namen ein.';
                 }
+                return null;
               },
-              child: const Text('Verkaufen'),
+              onSaved: (value) {
+                _ticketCreate = _ticketCreate.copyWith(name: value!);
+              },
             ),
-          ),
-          if (ticket != null) const Divider(height: 32),
-          if (ticket != null) Card(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: TicketWidget(ticket: ticket),
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: TicketTypeSelection(
+                selected: _ticketCreate.type,
+                onSelectionChanged: (selected) => setState(() {
+                  _ticketCreate = _ticketCreate.copyWith(type: selected!);
+                }),
+              ),
             ),
-          ),
+            const SizedBox(height: 8),
+            NotesField(
+              focusNode: focusNodes[1],
+              nextFocusNode: focusNodes[2],
+              onSaved: (value) {
+                _ticketCreate = _ticketCreate.copyWith(notes: value);
+              },
+            ),
+            const SizedBox(height: 32),
+            ErrorSubmitRow(
+              error: _error,
+              isLoading: _isLoading,
+              submitButton: FilledButton(
+                focusNode: focusNodes[2],
+                onPressed: () async {
+                  FocusScope.of(context).unfocus();
+                  if (_formKey.currentState!.validate() && widget.id != null) {
+                    _formKey.currentState!.save();
+                    setState(() {
+                      _isLoading = true;
+                    });
+                    try {
+                      await ref.read(ticketsProvider(widget.id!).notifier).createTicket(_ticketCreate);
+                    } catch (e, s) {
+                      getLogger().e('Failed to create ticket', error: e, stackTrace: s);
+                      setState(() {
+                        _error = e.toString();
+                        _isLoading = false;
+                      });
+                      return;
+                    }
+                    _formKey.currentState!.reset();
+                    setState(() {
+                      _ticketCreate = const TicketCreate(name: '', type: TicketType.student, notes: null);
+                      _error = null;
+                      _isLoading = false;
+                    });
+                    if (!context.mounted) {
+                      return;
+                    }
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        duration: const Duration(seconds: 3),
+                        backgroundColor: Colors.green,
+                        behavior: SnackBarBehavior.floating,
+                        content: const Text('Ticket erstellt', style: TextStyle(color: Colors.white)),
+                        action: SnackBarAction(
+                          label: 'Ok',
+                          textColor: Colors.white,
+                          onPressed: () {
+                            ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                          },
+                        ),
+                      ),
+                    );
+                  }
+                },
+                child: const Text('Verkaufen'),
+              ),
+            ),
+          ],
+          if (ticket != null) ...[
+            const SizedBox(height: 16),
+            Text("Ticket ${ticket.id} wurde erfolreich erstellt.", style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 16),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: TicketWidget(ticket: ticket),
+              ),
+            ),
+          ],
         ],
       ),
     );

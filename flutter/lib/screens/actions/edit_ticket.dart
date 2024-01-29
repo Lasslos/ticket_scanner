@@ -53,148 +53,164 @@ class _EditTicketState extends ConsumerState<EditTicket> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          NameField(
-            focusNode: focusNodes[0],
-            nextFocusNode: focusNodes[1],
-            onSaved: (value) {
-              String? name;
-              if (value != null && value.isNotEmpty) {
-                name = value;
-              }
-              _ticketUpdate = _ticketUpdate.copyWith(name: name);
-            },
-            validator: (value) {
-              return null;
-            },
-          ),
-          const SizedBox(height: 16),
-          SizedBox(
-            width: double.infinity,
-            child: TicketTypeSelection(
-              selected: _ticketUpdate.type,
-              allowNone: true,
-              onSelectionChanged: (selected) => setState(() {
-                _ticketUpdate = _ticketUpdate.copyWith(type: selected);
-              }),
-            ),
-          ),
-          const SizedBox(height: 8),
-          NotesField(
-            focusNode: focusNodes[1],
-            nextFocusNode: focusNodes[2],
-            onSaved: (value) {
-              String? notes;
-              if (value != null && value.isNotEmpty) {
-                notes = value;
-              }
-              _ticketUpdate = _ticketUpdate.copyWith(notes: notes);
-            },
-          ),
-          const SizedBox(height: 48),
-          ErrorSubmitRow(
-            error: _error,
-            isLoading: _isLoading,
-            clearButton: ElevatedButton(
-              onPressed: () {
-                FocusScope.of(context).unfocus();
-                _formKey.currentState!.reset();
-                setState(() {
-                  _ticketUpdate = const TicketUpdate();
-                  _error = null;
-                  _isLoading = false;
-                });
+          if (ticket != null) ...[
+            NameField(
+              focusNode: focusNodes[0],
+              nextFocusNode: focusNodes[1],
+              onSaved: (value) {
+                String? name;
+                if (value != null && value.isNotEmpty) {
+                  name = value;
+                }
+                _ticketUpdate = _ticketUpdate.copyWith(name: name);
               },
-              child: const Text('Leeren'),
+              validator: (value) {
+                return null;
+              },
             ),
-            submitButton: FilledButton(
-              focusNode: focusNodes[2],
-              onPressed: () async {
-                FocusScope.of(context).unfocus();
-                if (_formKey.currentState!.validate()) {
-                  _formKey.currentState!.save();
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              child: TicketTypeSelection(
+                selected: _ticketUpdate.type,
+                allowNone: true,
+                onSelectionChanged: (selected) => setState(() {
+                  _ticketUpdate = _ticketUpdate.copyWith(type: selected);
+                }),
+              ),
+            ),
+            const SizedBox(height: 8),
+            NotesField(
+              focusNode: focusNodes[1],
+              nextFocusNode: focusNodes[2],
+              onSaved: (value) {
+                String? notes;
+                if (value != null && value.isNotEmpty) {
+                  notes = value;
+                }
+                _ticketUpdate = _ticketUpdate.copyWith(notes: notes);
+              },
+            ),
+            const SizedBox(height: 48),
+            ErrorSubmitRow(
+              error: _error,
+              isLoading: _isLoading,
+              clearButton: ElevatedButton(
+                onPressed: () {
+                  FocusScope.of(context).unfocus();
+                  _formKey.currentState!.reset();
                   setState(() {
-                    _isLoading = true;
-                  });
-                  try {
-                    await ref.read(ticketsProvider(widget.id!).notifier).updateTicket(_ticketUpdate,);
-                  } catch (e, s) {
-                    getLogger().e('Failed to update ticket', error: e, stackTrace: s);
-                    setState(() {
-                      _error = e.toString();
-                      _isLoading = false;
-                    });
-                    return;
-                  }
-                  setState(() {
+                    _ticketUpdate = const TicketUpdate();
                     _error = null;
                     _isLoading = false;
                   });
-                }
-              },
-              child: const Text('Speichern'),
-            ),
-          ),
-
-          if (ticket != null) const Divider(height: 32),
-          if (ticket != null) Card(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  TicketWidget(ticket: ticket),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      ElevatedButton(
-                        onPressed: () async {
-                          showDialog(
-                            context: context,
-                            builder: (BuildContext context) => AlertDialog(
-                              title: const Text('Ticket löschen'),
-                              content: const Text('Soll das Ticket wirklich gelöscht werden?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                  child: const Text('Abbrechen'),
-                                ),
-                                TextButton(
-                                  onPressed: () async {
-                                    Navigator.of(context).pop();
-                                    try {
-                                      await ref.read(ticketsProvider(widget.id!).notifier).deleteTicket();
-                                    } catch (e, s) {
-                                      getLogger().e('Failed to delete ticket', error: e, stackTrace: s);
-                                      // ignore: use_build_context_synchronously
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Ticket konnte nicht gelöscht werden: ${e.toString()}'),
-                                        ),
-                                      );
-                                      return;
-                                    }
-                                    // ignore: use_build_context_synchronously
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Ticket gelöscht'),
-                                      ),
-                                    );
-                                  },
-                                  child: const Text('Löschen'),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: const Icon(Icons.delete, color: Colors.red),
-                      ),
-                    ],
-                  ),
-                ],
+                },
+                child: const Text('Leeren'),
+              ),
+              submitButton: FilledButton(
+                focusNode: focusNodes[2],
+                onPressed: () async {
+                  FocusScope.of(context).unfocus();
+                  if (_formKey.currentState!.validate()) {
+                    _formKey.currentState!.save();
+                    setState(() {
+                      _isLoading = true;
+                    });
+                    try {
+                      await ref.read(ticketsProvider(widget.id!).notifier).updateTicket(_ticketUpdate,);
+                    } catch (e, s) {
+                      getLogger().e('Failed to update ticket', error: e, stackTrace: s);
+                      setState(() {
+                        _error = e.toString();
+                        _isLoading = false;
+                      });
+                      return;
+                    }
+                    setState(() {
+                      _error = null;
+                      _isLoading = false;
+                    });
+                  }
+                },
+                child: const Text('Speichern'),
               ),
             ),
-          ),
+            const Divider(height: 32),
+            Card(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  children: [
+                    TicketWidget(ticket: ticket),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        ElevatedButton(
+                          onPressed: () async {
+                            showDialog(
+                              context: context,
+                              builder: (BuildContext context) => AlertDialog(
+                                title: const Text('Ticket löschen'),
+                                content: const Text('Soll das Ticket wirklich gelöscht werden?'),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                    child: const Text('Abbrechen'),
+                                  ),
+                                  TextButton(
+                                    onPressed: () async {
+                                      Navigator.of(context).pop();
+                                      try {
+                                        await ref.read(ticketsProvider(widget.id!).notifier).deleteTicket();
+                                      } catch (e, s) {
+                                        getLogger().e('Failed to delete ticket', error: e, stackTrace: s);
+                                        // ignore: use_build_context_synchronously
+                                        ScaffoldMessenger.of(context).showSnackBar(
+                                          SnackBar(
+                                              duration: const Duration(seconds: 3),
+                                              backgroundColor: Colors.red,
+                                              behavior: SnackBarBehavior.floating,
+                                              content: Text('Ticket konnte nicht gelöscht werden: ${e.toString()}', style: const TextStyle(color: Colors.white)),
+                                              action: SnackBarAction(
+                                                label: 'Ok',
+                                                textColor: Colors.white,
+                                                onPressed: () {
+                                                  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                                                },
+                                              )
+                                          ),
+                                        );
+                                        return;
+                                      }
+                                      // ignore: use_build_context_synchronously
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                          content: Text('Ticket gelöscht'),
+                                        ),
+                                      );
+                                    },
+                                    child: const Text('Löschen'),
+                                  ),
+                                ],
+                              ),
+                            );
+                          },
+                          child: const Icon(Icons.delete, color: Colors.red),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          if (ticket == null) ...[
+            const SizedBox(height: 16),
+            Text("Ticket ${widget.id} konnte nicht gefunden werden.", style: Theme.of(context).textTheme.titleSmall),
+            const SizedBox(height: 16),
+          ],
         ],
       ),
     );
