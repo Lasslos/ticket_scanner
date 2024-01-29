@@ -3,10 +3,11 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   plugins:
     - custom_lint
+  errors:
+    invalid_annotation_target: ignore
 
 linter:
   rules:
-    invalid_annotation_target: false
     always_declare_return_types: true
     always_put_control_body_on_new_line: true
     always_put_required_named_parameters_first: true
