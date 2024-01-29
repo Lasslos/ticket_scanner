@@ -9,7 +9,7 @@ import 'package:ticket_scanner/util/logger.dart';
 
 part 'session_provider.g.dart';
 
-final Uri baseUri = Uri.parse("https://ticket-scanner.laslo-hauschild.eu/");
+final Uri baseUri = Uri.parse("https://ticket-scanner.xn--sv-cjd-knigswinter-k3b.de/");
 
 @Riverpod(keepAlive: true)
 class Session extends _$Session {

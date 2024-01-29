@@ -1,4 +1,4 @@
-import 'package:dartlin/dartlin.dart';
+import 'package:dartlin/control_flow.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:ticket_scanner/screens/actions/create_ticket.dart';
@@ -91,7 +91,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         if (scanData == null) {
                           return;
                         }
-                        int? newId = scanData.code?.let((it) => int.tryParse(it));
+                        int? newId = scanData.rawValue?.let((it) => int.tryParse(it));
                         if (newId != null) {
                           setState(() {
                             _idController.text = newId.toString();

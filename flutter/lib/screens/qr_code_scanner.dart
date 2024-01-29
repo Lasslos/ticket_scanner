@@ -1,13 +1,10 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:qr_code_scanner/qr_code_scanner.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:ticket_scanner/util/logger.dart';
 import 'package:vibration/vibration.dart';
 
 Future<Barcode?> showScanDialog(BuildContext context) {
-  final qrKey = GlobalKey<_QRCodeScannerState>();
   return showDialog<Barcode>(
     context: context,
     builder: (dialogContext) => Dialog(
@@ -28,12 +25,11 @@ Future<Barcode?> showScanDialog(BuildContext context) {
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: QRCodeScanner(
-                key: qrKey,
-                onScan: (data) async {
-                  Navigator.of(dialogContext).maybePop(data);
+                onScan: (Barcode barcode) async {
+                  Navigator.of(dialogContext).maybePop(barcode.rawValue);
                   if ((await Vibration.hasVibrator())!) {
-                    getLogger().d("Vibrating, data: ${data.code}");
-                    await Vibration.vibrate(amplitude: 64, duration: 32);
+                  getLogger().d("Vibrating, data: ${barcode.rawValue}");
+                  await Vibration.vibrate(amplitude: 64, duration: 32);
                   }
                 },
               ),
@@ -66,21 +62,7 @@ class QRCodeScanner extends ConsumerStatefulWidget {
 }
 
 class _QRCodeScannerState extends ConsumerState<QRCodeScanner> {
-  final GlobalKey qrKey = GlobalKey(debugLabel: 'QR');
-  Barcode? savedData;
-  late QRViewController controller;
-
-  // In order to get hot reload to work we need to pause the camera if the platform
-  // is android, or resume the camera if the platform is iOS.
-  @override
-  void reassemble() {
-    super.reassemble();
-    if (Platform.isAndroid) {
-      controller.pauseCamera();
-    } else if (Platform.isIOS) {
-      controller.resumeCamera();
-    }
-  }
+  MobileScannerController cameraController = MobileScannerController();
 
   @override
   Widget build(BuildContext context) => Column(
@@ -91,33 +73,62 @@ class _QRCodeScannerState extends ConsumerState<QRCodeScanner> {
         height: 300,
         width: 300,
 
-        child: QRView(
-          key: qrKey,
-          onQRViewCreated: _onQRViewCreated,
+        child: Stack(
+          children: [
+            MobileScanner(
+              // fit: BoxFit.contain,
+              controller: cameraController,
+              onDetect: (capture) {
+                final List<Barcode> barcodes = capture.barcodes;
+                for (final barcode in barcodes) {
+                  getLogger().d("Barcode found: ${barcode.rawValue}");
+                  widget.onScan(barcode);
+                }
+              },
+            ),
+
+            Align(
+              alignment: Alignment.bottomCenter,
+              child: Row(
+                children: [
+                  IconButton(
+                    color: Colors.white,
+                    icon: ValueListenableBuilder(
+                      valueListenable: cameraController.torchState,
+                      builder: (context, state, child) {
+                        switch (state) {
+                          case TorchState.off:
+                            return const Icon(Icons.flash_off, color: Colors.grey);
+                          case TorchState.on:
+                            return const Icon(Icons.flash_on, color: Colors.yellow);
+                        }
+                      },
+                    ),
+                    iconSize: 32.0,
+                    onPressed: () => cameraController.toggleTorch(),
+                  ),
+                  IconButton(
+                    color: Colors.white,
+                    icon: ValueListenableBuilder(
+                      valueListenable: cameraController.cameraFacingState,
+                      builder: (context, state, child) {
+                        switch (state) {
+                          case CameraFacing.front:
+                            return const Icon(Icons.camera_front);
+                          case CameraFacing.back:
+                            return const Icon(Icons.camera_rear);
+                        }
+                      },
+                    ),
+                    iconSize: 32.0,
+                    onPressed: () => cameraController.switchCamera(),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
-      if (savedData != null) ...[
-        const SizedBox(height: 16),
-        Text(savedData!.code ?? "Keine Daten"),
-      ],
     ],
   );
-
-  void _onQRViewCreated(QRViewController controller) {
-    this.controller = controller;
-    controller.scannedDataStream.listen((scanData) async {
-      if (savedData?.code != scanData.code) {
-        setState(() {
-          savedData = scanData;
-        });
-        widget.onScan(scanData);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    controller.dispose();
-    super.dispose();
-  }
 }
